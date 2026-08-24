@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDS Texture Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="toolbar">
+    <div class="toolbar-left">
+      <div class="app-icon">
+        <svg viewBox="0 0 32 32" width="28" height="28">
+          <defs>
+            <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#667eea"/>
+              <stop offset="100%" style="stop-color:#764ba2"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#iconGrad)"/>
+          <rect x="7" y="8" width="18" height="16" rx="2" fill="none" stroke="white" stroke-width="1.5"/>
+          <rect x="10" y="11" width="5" height="5" fill="white" opacity="0.8"/>
+          <rect x="17" y="11" width="5" height="5" fill="white" opacity="0.6"/>
+          <rect x="10" y="18" width="5" height="3" fill="white" opacity="0.5"/>
+          <rect x="17" y="18" width="5" height="3" fill="white" opacity="0.7"/>
+        </svg>
+      </div>
+      <div class="app-title">
+        <h1>DDS Texture Tool</h1>
+        <span class="app-subtitle" data-i18n="appSubtitle">通用 DDS 纹理批量处理工具 v1.9.0</span>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <div class="texconv-status" id="texconvStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">未设置 texconv</span>
+      </div>
+      <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)" title="语言">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+      </select>
+      <button class="btn btn-icon" id="btnThemeToggle" onclick="toggleTheme()" title="切换主题">
+        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <button class="btn btn-icon" id="btnCheckUpdate" onclick="checkUpdate()" title="检查更新">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 2v6h-6"/>
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+          <path d="M3 22v-6h6"/>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        </svg>
+      </button>
+      <button class="btn btn-secondary" id="btnSelectTexconv">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+          <circle cx="12" cy="13" r="3"/>
+        </svg>
+        选择 texconv
+      </button>
+    </div>
+  </header>
+
+  <div class="path-bar" id="pathBar" style="display:none;">
+    <span class="path-label">texconv 路径:</span>
+    <span class="path-value" id="texconvPath"></span>
+    <button class="btn btn-link" id="btnChangeTexconv">更改</button>
+  </div>
+
+  <div class="main-container">
+    <nav class="sidebar">
+      <div class="nav-item active" data-tab="process">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span>批量处理</span>
+      </div>
+      <div class="nav-item" data-tab="rollback">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        <span>备份回滚</span>
+      </div>
+      <div class="nav-item" data-tab="info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span>文件信息</span>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <a href="#" class="nav-link" id="btnHelp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          使用帮助
+        </a>
+      </div>
+    </nav>
+
+    <main class="content">
+      <section class="tab-content active" id="tab-process">
+        <div class="panel">
+          <h2 class="panel-title">批量处理设置</h2>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>输入目录 / 文件</label>
+              <div class="input-group">
+                <input type="text" id="inputDir" placeholder="选择包含 DDS 文件的目录，或单个 DDS 文件">
+                <button class="btn btn-secondary" onclick="selectInputDir()">目录</button>
+                <button class="btn btn-secondary" onclick="selectInputFile()">文件</button>
+                <button class="btn btn-secondary" onclick="openInputFolder()">打开</button>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>输出目录 <span class="hint">（留空则原地覆盖）</span></label>
+              <div class="input-group">
+                <input type="text" id="outputDir" placeholder="留空则原地覆盖原文件">
+                <button class="btn btn-secondary" onclick="selectOutputDir()">浏览</button>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>快速预设</label>
+              <div class="preset-row">
+                <button class="btn btn-secondary btn-sm preset-btn" onclick="applyPreset(8192)">8K (8192)</button>
+                <button class="btn btn-secondary btn-sm preset-btn" onclick="applyPreset(4096)">4K (4096)</button>
+                <button class="btn btn-secondary btn-sm preset-btn active" onclick="applyPreset(3072)">3K (3072)</button>
+                <button class="btn btn-secondary btn-sm preset-btn" onclick="applyPreset(2048)">2K (2048)</button>
+                <button class="btn btn-secondary btn-sm preset-btn" onclick="applyPreset(1024)">1K (1024)</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>最大宽度 (px)</label>
+              <input type="number" id="maxWidth" value="3072" min="0">
+            </div>
+            <div class="form-group">
+              <label>最大高度 (px)</label>
+              <input type="number" id="maxHeight" value="3072" min="0">
+            </div>
+            <div class="form-group">
+              <label>尺寸对齐到</label>
+              <select id="alignTo">
+                <option value="1">1 (不对齐)</option>
+                <option value="2">2</option>
+                <option value="4" selected>4 (推荐)</option>
+                <option value="8">8</option>
+                <option value="16">16</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>缩放模式</label>
+              <select id="fitMode">
+                <option value="inside" selected>等比例内适应</option>
+                <option value="width">按宽度缩放</option>
+                <option value="height">按高度缩放</option>
+                <option value="stretch">拉伸到目标尺寸</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>目标格式</label>
+              <select id="targetFormat">
+                <option value="">保持原格式</option>
+                <optgroup label="BC 压缩格式">
+                  <option value="BC1_UNORM">BC1_UNORM (DXT1)</option>
+                  <option value="BC1_UNORM_SRGB">BC1_UNORM_SRGB</option>
+                  <option value="BC2_UNORM">BC2_UNORM (DXT3)</option>
+                  <option value="BC2_UNORM_SRGB">BC2_UNORM_SRGB</option>
+                  <option value="BC3_UNORM">BC3_UNORM (DXT5)</option>
+                  <option value="BC3_UNORM_SRGB">BC3_UNORM_SRGB</option>
+                  <option value="BC4_UNORM">BC4_UNORM</option>
+                  <option value="BC4_SNORM">BC4_SNORM</option>
+                  <option value="BC5_UNORM">BC5_UNORM</option>
+                  <option value="BC5_SNORM">BC5_SNORM</option>
+                  <option value="BC6H_UF16">BC6H_UF16</option>
+                  <option value="BC6H_SF16">BC6H_SF16</option>
+                  <option value="BC7_UNORM">BC7_UNORM</option>
+                  <option value="BC7_UNORM_SRGB">BC7_UNORM_SRGB</option>
+                </optgroup>
+                <optgroup label="未压缩格式">
+                  <option value="R8G8B8A8_UNORM">R8G8B8A8_UNORM</option>
+                  <option value="R8G8B8A8_UNORM_SRGB">R8G8B8A8_UNORM_SRGB</option>
+                  <option value="B8G8R8A8_UNORM">B8G8R8A8_UNORM</option>
+                  <option value="R16G16B16A16_FLOAT">R16G16B16A16_FLOAT</option>
+                  <option value="R32G32B32A32_FLOAT">R32G32B32A32_FLOAT</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>sRGB 处理</label>
+              <select id="srgbMode">
+                <option value="auto" selected>自动</option>
+                <option value="on">强制开启</option>
+                <option value="off">强制关闭</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mipmap 级数</label>
+              <input type="text" id="mipmaps" placeholder="留空=保持原文件">
+            </div>
+            <div class="form-group">
+              <label>处理线程数</label>
+              <input type="number" id="threads" value="4" min="1" max="32">
+            </div>
+            <div class="form-group">
+              <label>DXT 压缩质量</label>
+              <select id="dxtQuality">
+                <option value="fast">快速</option>
+                <option value="normal">标准</option>
+                <option value="production" selected>生产级</option>
+                <option value="highest">最高</option>
+              </select>
+            </div>
+          </div>
+          <div class="options-row">
+            <label class="checkbox">
+              <input type="checkbox" id="recursive" checked>
+              <span>递归扫描子目录</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="backup" checked>
+              <span>处理前自动备份</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="skipUnchanged" checked>
+              <span>跳过无需变化的文件</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="forceFormat">
+              <span>强制转换格式</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="genMipmaps">
+              <span>生成完整 Mipmap</span>
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="dryRun">
+              <span>预览模式（不实际修改）</span>
+            </label>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary btn-lg" id="btnStartProcess" onclick="startProcess()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              开始处理
+            </button>
+            <button class="btn btn-secondary btn-lg" id="btnScanPreview" onclick="scanPreview()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              扫描预览
+            </button>
+            <button class="btn btn-danger btn-lg" id="btnCancelProcess" style="display:none;" onclick="cancelProcess()">
+              取消
+            </button>
+          </div>
+        </div>
+
+        <div class="panel" id="progressPanel" style="display:none;">
+          <h2 class="panel-title">处理进度</h2>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 / 0</div>
+          </div>
+          <div class="stats-row">
+            <div class="stat-item">
+              <span class="stat-label">已处理</span>
+              <span class="stat-value" id="statProcessed">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">跳过</span>
+              <span class="stat-value" id="statSkipped">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">失败</span>
+              <span class="stat-value stat-error" id="statFailed">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">耗时</span>
+              <span class="stat-value" id="statDuration">0s</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="fileListPanel" style="display:none;">
+          <div class="panel-header-with-actions">
+            <h2 class="panel-title">文件列表 <span class="panel-subtitle" id="fileCount"></span></h2>
+            <div class="action-row">
+              <button class="btn btn-secondary btn-sm" onclick="selectAllScanFiles(true)">全选</button>
+              <button class="btn btn-secondary btn-sm" onclick="selectAllScanFiles(false)">全不选</button>
+              <button class="btn btn-primary btn-sm" onclick="processSelectedFiles()">处理选中</button>
+            </div>
+          </div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+      </section>
+
+      <section class="tab-content" id="tab-rollback">
+        <div class="panel">
+          <h2 class="panel-title">备份回滚</h2>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>工作目录</label>
+              <div class="input-group">
+                <input type="text" id="rollbackBaseDir" placeholder="选择包含备份的工作目录">
+                <button class="btn btn-secondary" onclick="selectRollbackDir()">浏览</button>
+                <button class="btn btn-secondary" onclick="openRollbackFolder()">打开</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>保留备份数量</label>
+              <input type="number" id="keepCount" value="5" min="1">
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="refreshBackups()">刷新备份列表</button>
+            <button class="btn btn-secondary" onclick="manualBackup()">手动备份</button>
+            <button class="btn btn-warning" onclick="cleanOldBackups()">清理旧备份</button>
+            <button class="btn btn-danger" onclick="cleanAllBackups()">删除所有备份</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel-title">备份点列表 <span class="panel-subtitle" id="backupTotalSize"></span></h2>
+          <div class="backup-list" id="backupList">
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="16" rx="2"/>
+                <path d="M3 10h18"/>
+              </svg>
+              <p>暂无备份点</p>
+              <p class="hint">选择工作目录后点击"刷新备份列表"</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="backupDetailPanel" style="display:none;">
+          <div class="panel-header-with-actions">
+            <h2 class="panel-title">备份详情 <span class="panel-subtitle" id="backupDetailTitle"></span></h2>
+            <div class="action-row">
+              <button class="btn btn-secondary btn-sm" id="btnViewMode" onclick="toggleBackupViewMode()">文件夹视图</button>
+              <button class="btn btn-secondary btn-sm" onclick="toggleSelectAllBackupFiles()">全选/反选</button>
+              <button class="btn btn-primary btn-sm" onclick="rollbackSelectedFiles()">回滚选中</button>
+              <button class="btn btn-secondary btn-sm" onclick="closeBackupDetail()">关闭</button>
+            </div>
+          </div>
+          <div class="backup-detail-toolbar">
+            <input type="text" id="backupFileSearch" placeholder="搜索文件名..." oninput="filterBackupFiles(this.value)" style="flex:1;">
+            <button class="btn btn-secondary btn-sm" onclick="expandAllFolders()">全部展开</button>
+            <button class="btn btn-secondary btn-sm" onclick="collapseAllFolders()">全部折叠</button>
+            <span id="backupFileFilterInfo" class="backup-filter-info"></span>
+          </div>
+          <div class="backup-file-list" id="backupFileList"></div>
+        </div>
+      </section>
+
+      <section class="tab-content" id="tab-info">
+        <div class="panel">
+          <h2 class="panel-title">DDS 文件信息批量查看</h2>
+          <div class="form-group full-width">
+            <label>选择目录或文件</label>
+            <div class="input-group">
+              <input type="text" id="infoFilePath" placeholder="选择包含 DDS 的目录，或单个 DDS 文件">
+              <button class="btn btn-secondary" onclick="selectInfoDir()">目录</button>
+              <button class="btn btn-secondary" onclick="selectInfoFile()">文件</button>
+              <button class="btn btn-secondary" onclick="openInfoFolder()">打开</button>
+            </div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-primary" onclick="scanInfoFiles()">扫描并查看</button>
+            <button class="btn btn-secondary" onclick="exportInfoCSV()">导出 CSV</button>
+          </div>
+        </div>
+
+        <div class="panel" id="infoStatsPanel" style="display:none;">
+          <h2 class="panel-title">统计汇总</h2>
+          <div class="info-stats-grid" id="infoStats"></div>
+        </div>
+
+        <div class="panel" id="infoListPanel" style="display:none;">
+          <div class="panel-header-with-actions">
+            <h2 class="panel-title">文件列表 <span class="panel-subtitle" id="infoFileCount"></span></h2>
+            <div class="action-row">
+              <input type="text" id="infoSearch" placeholder="搜索文件名..." oninput="filterInfoList(this.value)" style="width:200px;">
+            </div>
+          </div>
+          <div class="info-table-container">
+            <table class="info-table" id="infoTable">
+              <thead>
+                <tr>
+                  <th onclick="sortInfoTable('name')">文件名 ↕</th>
+                  <th onclick="sortInfoTable('width')">尺寸 ↕</th>
+                  <th onclick="sortInfoTable('format')">格式 ↕</th>
+                  <th onclick="sortInfoTable('size')">大小 ↕</th>
+                  <th onclick="sortInfoTable('mipmaps')">Mipmap ↕</th>
+                </tr>
+              </thead>
+              <tbody id="infoTableBody" onclick="onInfoTableClick(event)"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" id="infoResultPanel" style="display:none;">
+          <div class="panel-header-with-actions">
+            <h2 class="panel-title">文件详细信息</h2>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('infoResultPanel').style.display='none'">关闭</button>
+          </div>
+          <div class="info-grid" id="infoResult"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="log-panel">
+    <div class="log-header">
+      <span class="log-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 17 10 11 4 5"/>
+          <line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+        运行日志
+      </span>
+      <button class="btn btn-link btn-sm" onclick="clearLog()">清空</button>
+    </div>
+    <div class="current-file-bar" id="currentFileBar" style="display:none;">
+      <span class="current-file-label">当前处理:</span>
+      <span class="current-file-name" id="currentFileName">-</span>
+      <span class="current-file-info" id="currentFileInfo"></span>
+    </div>
+    <div class="log-content" id="logContent"></div>
+  </footer>
+
+  <div class="modal-overlay" id="helpModal" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>使用帮助</h3>
+        <button class="modal-close" onclick="closeHelp()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4>1. 快速开始</h4>
+        <ul>
+          <li>内置 texconv，开箱即用，无需额外配置</li>
+          <li>选择输入目录或单个 DDS 文件</li>
+          <li>用快速预设一键设置目标尺寸（8K/4K/3K/2K/1K）</li>
+          <li>点击"扫描预览"查看文件列表，可勾选只处理部分文件</li>
+          <li>点击"开始处理"执行批量转换</li>
+        </ul>
+        <h4>2. 单文件处理</h4>
+        <p>输入框旁边的"文件"按钮可选择单个 DDS 文件，只处理这一个文件，避免误操作整个目录。</p>
+        <h4>3. 选择性处理</h4>
+        <p>点击"扫描预览"后，文件列表中每个文件都有复选框。可全选/全不选，或只勾选需要处理的文件，然后点击"处理选中"。状态列会显示"需处理"或"跳过"。</p>
+        <h4>4. 快速预设</h4>
+        <p>提供 8K(8192)、4K(4096)、3K(3072)、2K(2048)、1K(1024) 五个常用尺寸预设，点击即设置最大宽高。</p>
+        <h4>5. 小文件处理选项</h4>
+        <p>默认勾选"跳过无需变化的文件"，只有尺寸超过上限或格式/mipmap需要变化的文件才会被处理。取消勾选后所有文件都会重新编码，适用于统一格式、修复损坏文件等场景。</p>
+        <h4>6. 备份与回滚</h4>
+        <ul>
+          <li>处理前默认自动备份，只备份需要处理的文件</li>
+          <li>备份回滚页面支持文件夹视图，可按文件夹分组查看</li>
+          <li>点击备份点展开文件详情，支持单文件回滚和对比</li>
+          <li>可全部展开/折叠文件夹，搜索过滤文件名</li>
+          <li>支持手动备份、清理旧备份、删除所有备份</li>
+        </ul>
+        <h4>7. 文件信息批量查看</h4>
+        <ul>
+          <li>选择目录后一键扫描所有 DDS 文件，显示统计汇总（总数/总大小/最大尺寸/尺寸分布/格式分布）</li>
+          <li>可排序表格展示所有文件，支持搜索过滤、点击查看详情、导出 CSV</li>
+          <li>输入目录会自动从批量处理页面同步</li>
+        </ul>
+        <h4>8. 主题与语言</h4>
+        <ul>
+          <li>右上角太阳/月亮图标切换白天/黑夜主题</li>
+          <li>语言下拉菜单切换中文/英文界面</li>
+          <li>设置自动保存，下次启动恢复</li>
+        </ul>
+        <h4>9. 版本检查</h4>
+        <p>右上角刷新图标检查 GitHub 最新版本，有更新时提示下载链接。</p>
+        <h4>10. 注意事项</h4>
+        <ul>
+          <li>处理前建议保持"自动备份"勾选，出错可回滚</li>
+          <li>输出目录留空则原地覆盖原文件</li>
+          <li>保持原格式可避免 NPC 变白等兼容性问题</li>
+          <li>日志中失败条目可点击展开查看详细错误</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
