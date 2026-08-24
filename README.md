@@ -35,7 +35,7 @@
 ## 从源码运行
 
 ```bash
-# 安装依赖
+# 安装依赖（生成 package-lock.json）
 npm install
 
 # 开发模式运行
@@ -44,6 +44,12 @@ npm start
 # 打包
 npm run build
 ```
+
+### 源码运行注意事项
+
+- **texconv.exe**：从源码运行时，需要手动将 `texconv.exe` 放到 `assets/bin/` 目录下。可从 [微软 DirectXTex releases](https://github.com/microsoft/DirectXTex/releases) 下载。
+- **应用图标**：运行 `node generate-icon.js` 生成 `assets/icon.png`。
+- **打包后**：texconv.exe 会被自动打包到 `resources/bin/` 目录，开箱即用。
 
 ## 项目结构
 
@@ -55,15 +61,16 @@ dds-gui/
 ├── renderer.js          # 渲染进程逻辑
 ├── style.css            # 样式
 ├── package.json         # 项目配置
+├── generate-icon.js     # 图标生成脚本
 ├── src/
 │   ├── dds-parser.js    # DDS 文件解析
 │   ├── backup-manager.js # 备份管理
 │   ├── file-scanner.js  # 文件扫描
 │   └── processor.js     # texconv 调用封装
 └── assets/
-    ├── icon.png         # 应用图标
+    ├── icon.png         # 应用图标（运行 generate-icon.js 生成）
     └── bin/
-        └── texconv.exe  # 内置 texconv 工具
+        └── texconv.exe  # 内置 texconv 工具（需手动放置）
 ```
 
 ## 技术栈
