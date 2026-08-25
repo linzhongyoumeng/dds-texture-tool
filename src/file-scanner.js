@@ -9,27 +9,21 @@ const { BACKUP_DIR_NAME } = require('./backup-manager');
 class FileScanner {
   constructor() {}
 
-  /**
-   * 扫描符合条件的 DDS 文件
-   */
   scan(config) {
     const inputDir = path.resolve(config.input_dir || '.');
     if (!fs.existsSync(inputDir)) return [];
-
     const files = [];
     const recursive = config.recursive !== false;
     const includePatterns = config.include_patterns || ['*.dds'];
     const excludePatterns = config.exclude_patterns || [];
     const minFileSize = config.min_file_size || 0;
     const maxFileSize = config.max_file_size || 0;
-
     const matchPattern = (filename, patterns) => {
       return patterns.some(p => {
         const regex = new RegExp('^' + p.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i');
         return regex.test(filename);
       });
     };
-
     const walk = (dir) => {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
@@ -49,7 +43,6 @@ class FileScanner {
         }
       }
     };
-
     walk(inputDir);
     return files.sort();
   }
