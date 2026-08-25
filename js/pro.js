@@ -1,51 +1,90 @@
-/**
- * 专业模式模块
- * 完整 texconv 功能支持，批量/单文件处理，CPU 模式
- */
+// 专业模式前端逻辑
+// 配置收集、处理控制、进度更新
 
-// 专业模式状态
 let proIsProcessing = false;
 let proProcessStartTime = 0;
-let proStats = { total: 0, processed: 0, skipped: 0, failed: 0 };
 let proProgressUnsubscribe = null;
+let proStats = { total: 0, processed: 0, skipped: 0, failed: 0 };
 
+/**
+ * 选择专业模式输入目录
+ */
 async function selectProInputDir() {
   try {
     const result = await window.ddsTool.selectDirectory();
-    if (result) { document.getElementById('proInputDir').value = result; log(`专业模式 - 已选择输入目录: ${result}`, 'info'); }
-  } catch (e) { log(`选择目录失败: ${e.message}`, 'error'); }
+    if (result && typeof result === 'string') {
+      document.getElementById('proInputDir').value = result;
+      log(`专业模式 - 已选择输入目录: ${result}`, 'info');
+    } else if (result && result.path) {
+      document.getElementById('proInputDir').value = result.path;
+      log(`专业模式 - 已选择输入目录: ${result.path}`, 'info');
+    }
+  } catch (e) {
+    log(`选择目录失败: ${e.message}`, 'error');
+  }
 }
 
+/**
+ * 选择专业模式输入文件
+ */
 async function selectProInputFile() {
   try {
-    const result = await window.ddsTool.selectDdsFile();
-    if (result) { document.getElementById('proInputDir').value = result; log(`专业模式 - 已选择输入文件: ${result}`, 'info'); }
-  } catch (e) { log(`选择文件失败: ${e.message}`, 'error'); }
+    const result = await window.ddsTool.selectFile();
+    if (result && typeof result === 'string') {
+      document.getElementById('proInputDir').value = result;
+      log(`专业模式 - 已选择输入文件: ${result}`, 'info');
+    } else if (result && result.path) {
+      document.getElementById('proInputDir').value = result.path;
+      log(`专业模式 - 已选择输入文件: ${result.path}`, 'info');
+    }
+  } catch (e) {
+    log(`选择文件失败: ${e.message}`, 'error');
+  }
 }
 
-function openProInputFolder() {
-  const path = document.getElementById('proInputDir').value.trim();
-  if (!path) { log('请先选择输入目录或文件', 'warning'); return; }
-  window.ddsTool.openPath(path);
-}
-
+/**
+ * 选择专业模式输出目录
+ */
 async function selectProOutputDir() {
   try {
     const result = await window.ddsTool.selectDirectory();
-    if (result) { document.getElementById('proOutputDir').value = result; log(`专业模式 - 已选择输出目录: ${result}`, 'info'); }
-  } catch (e) { log(`选择目录失败: ${e.message}`, 'error'); }
+    if (result && typeof result === 'string') {
+      document.getElementById('proOutputDir').value = result;
+      log(`专业模式 - 已选择输出目录: ${result}`, 'info');
+    } else if (result && result.path) {
+      document.getElementById('proOutputDir').value = result.path;
+      log(`专业模式 - 已选择输出目录: ${result.path}`, 'info');
+    }
+  } catch (e) {
+    log(`选择目录失败: ${e.message}`, 'error');
+  }
 }
 
+/**
+ * 打开输入文件夹
+ */
+function openProInputFolder() {
+  const dir = document.getElementById('proInputDir').value.trim();
+  if (dir) {
+    window.ddsTool.openPath(dir);
+  } else {
+    log('请先选择输入目录', 'warning');
+  }
+}
+
+/**
+ * 收集专业模式配置
+ */
 function collectProConfig() {
   const width = parseInt(document.getElementById('proWidth').value) || 0;
   const height = parseInt(document.getElementById('proHeight').value) || 0;
   const scale = parseFloat(document.getElementById('proScale').value) || 1;
-  const cpuMode = document.getElementById('proCpuMode').value;
-  const cpuCores = navigator.hardwareConcurrency || 4;
-  let threads = 1;
-  if (cpuMode === 'multi') threads = Math.max(2, Math.floor(cpuCores / 2));
-  else if (cpuMode === 'all') threads = cpuCores;
-  return {
+  
+  // 处理模式（CPU/GPU）
+  const processMode = document.getElementById('proProcessMode').value;
+  const singleProc = document.getElementById('proSingleProc').checked;
+  
+  const config = {
     texconv_path: currentConfig.texconv_path || '',
     input_dir: document.getElementById('proInputDir').value.trim(),
     output_dir: document.getElementById('proOutputDir').value.trim() || null,
@@ -59,81 +98,127 @@ function collectProConfig() {
     filter: document.getElementById('proFilter').value,
     srgb: document.getElementById('proSrgb').value,
     alpha: document.getElementById('proAlpha').value,
-    threads: threads,
-    cpu_mode: cpuMode,
+    process_mode: processMode,
+    single_proc: singleProc,
     backup: document.getElementById('proKeepOriginal').checked,
     recursive: document.getElementById('proRecursive').checked,
     dry_run: document.getElementById('proDryRun').checked,
     pro_mode: true,
   };
+  
+  return config;
 }
 
+/**
+ * 开始专业模式处理
+ */
 async function startProProcess() {
   if (proIsProcessing) return;
+  
   const config = collectProConfig();
-  if (!config.input_dir) { log('请选择输入目录或文件', 'error'); return; }
+  
+  // 验证输入
+  if (!config.input_dir) {
+    log('请选择输入目录或文件', 'error');
+    return;
+  }
+  
   proIsProcessing = true;
   proProcessStartTime = Date.now();
   proStats = { total: 0, processed: 0, skipped: 0, failed: 0 };
+  
+  // 注册进度更新监听器
   proProgressUnsubscribe = window.ddsTool.onProcessProgress((data) => {
     if (!proIsProcessing || !data) return;
     if (data.completed !== undefined && data.total !== undefined) {
-      proStats.total = data.total; proStats.processed = data.completed; updateProProgress();
+      proStats.total = data.total;
+      proStats.processed = data.completed;
+      updateProProgress();
     }
   });
+  
+  // 更新 UI
   document.getElementById('btnProStart').style.display = 'none';
-  document.getElementById('btnProCancel').style.display = 'inline-block';
+  document.getElementById('btnProCancel').style.display = 'inline-flex';
   document.getElementById('proProgressSection').style.display = 'block';
   document.getElementById('proStats').style.display = 'grid';
-  log('========== 专业模式开始处理 ==========', 'info');
-  log(`输入: ${config.input_dir}`, 'info');
-  if (config.output_dir) log(`输出: ${config.output_dir}`, 'info');
-  if (config.target_format) log(`目标格式: ${config.target_format}`, 'info');
-  if (config.target_width || config.target_height) log(`目标尺寸: ${config.target_width || '保持'}x${config.target_height || '保持'}`, 'info');
-  if (config.scale) log(`缩放比例: ${config.scale}x`, 'info');
-  log(`输入格式: ${config.input_format || 'all'}`, 'info');
-  log(`CPU 模式: ${config.cpu_mode} (${config.threads} 线程)`, 'info');
-  log(`预览模式: ${config.dry_run ? '是' : '否'}`, 'info');
+  
+  log(config.dry_run ? '[专业模式-预览] 开始预览处理...' : '[专业模式] 开始处理...');
+  
   try {
     const result = await window.ddsTool.startProProcess(config);
-    if (!result || !result.success) { log(`处理失败: ${result?.error || '未知错误'}`, 'error'); finishProProcess(); return; }
-    const report = result.report;
-    proStats.total = report.total || 0; proStats.processed = report.processed || 0;
-    proStats.skipped = report.skipped || 0; proStats.failed = report.failed || 0;
-    updateProProgress();
-    if (config.dry_run && report.change_list && report.change_list.length > 0) {
-      log('========== 预览 - 文件变更详情 ==========', 'info');
-      let changeCount = 0;
-      for (const change of report.change_list) {
-        const sizeInfo = `${change.original.width}x${change.original.height} → ${change.target.width}x${change.target.height}`;
-        const formatInfo = change.original.format !== change.target.format ? ` [${change.original.format} → ${change.target.format}]` : '';
-        const fileSize = change.original.fileSize ? ` (${(change.original.fileSize / 1024 / 1024).toFixed(2)}MB)` : '';
-        if (change.willChange) { changeCount++; log(`  [变更] ${change.filename}${fileSize}: ${sizeInfo}${formatInfo}`, 'info'); log(`         变更项: ${change.changes.join(', ')}`, 'debug'); }
-        else { log(`  [保持] ${change.filename}${fileSize}: ${sizeInfo}${formatInfo} - 无变更`, 'debug'); }
+    
+    if (result.success) {
+      const report = result.report;
+      const dur = report.duration ? report.duration.toFixed(1) : '0';
+      if (config.dry_run) {
+        log(`[专业模式-预览] 完成 - 需处理 ${report.processed} 个，跳过 ${report.skipped} 个，失败 ${report.failed} 个，耗时 ${dur}s`, report.failed > 0 ? 'warning' : 'success');
+      } else {
+        log(`[专业模式] 完成 - 成功 ${report.processed}，跳过 ${report.skipped}，失败 ${report.failed}，耗时 ${dur}s`, report.failed > 0 ? 'warning' : 'success');
       }
-      log(`========== 预览完成: 共 ${report.change_list.length} 个文件，其中 ${changeCount} 个将被修改 ==========`, 'success');
+      
+      // 更新最终统计
+      proStats.total = report.total || proStats.total;
+      proStats.processed = report.processed;
+      proStats.skipped = report.skipped;
+      proStats.failed = report.failed;
+      updateProProgress();
+      
+      if (report.backup_id) {
+        log(`备份点 ID: ${report.backup_id}（可在"备份回滚"页面恢复）`, 'info');
+      }
+    } else {
+      log(`专业模式处理失败: ${result.error}`, 'error');
     }
-    const elapsed = ((Date.now() - proProcessStartTime) / 1000).toFixed(1);
-    log('========== 专业模式处理完成 ==========', 'success');
-    log(`总计: ${proStats.total}, 已处理: ${proStats.processed}, 已跳过: ${proStats.skipped}, 失败: ${proStats.failed}`, 'info');
-    log(`耗时: ${elapsed} 秒`, 'info');
-  } catch (e) { log(`处理出错: ${e.message}`, 'error'); proStats.failed++; updateProProgress(); }
-  finally { finishProProcess(); }
+  } catch (e) {
+    log(`专业模式处理异常: ${e.message}`, 'error');
+  } finally {
+    proIsProcessing = false;
+    if (proProgressUnsubscribe) {
+      proProgressUnsubscribe();
+      proProgressUnsubscribe = null;
+    }
+    document.getElementById('btnProStart').style.display = 'inline-flex';
+    document.getElementById('btnProCancel').style.display = 'none';
+  }
 }
 
+/**
+ * 取消专业模式处理
+ */
 async function cancelProProcess() {
   if (!proIsProcessing) return;
-  try { await window.ddsTool.cancelProProcess(); log('用户取消处理', 'warning'); } catch (e) { log(`取消失败: ${e.message}`, 'error'); }
-  finishProProcess();
-}
-
-function finishProProcess() {
+  log('正在取消专业模式处理...', 'warning');
+  try {
+    await window.ddsTool.cancelProProcess();
+  } catch (e) {
+    log(`取消失败: ${e.message}`, 'error');
+  }
+  await new Promise(r => setTimeout(r, 500));
   proIsProcessing = false;
-  document.getElementById('btnProStart').style.display = 'inline-block';
+  document.getElementById('btnProStart').style.display = 'inline-flex';
   document.getElementById('btnProCancel').style.display = 'none';
-  if (proProgressUnsubscribe) { proProgressUnsubscribe(); proProgressUnsubscribe = null; }
+  log('专业模式处理已取消', 'warning');
 }
 
+/**
+ * 更新专业模式进度
+ */
+function updateProProgress() {
+  const { total, processed, skipped, failed } = proStats;
+  const percent = total > 0 ? Math.round((processed / total) * 100) : 0;
+  
+  document.getElementById('proProgressBar').style.width = `${percent}%`;
+  document.getElementById('proProgressText').textContent = `${processed} / ${total}`;
+  document.getElementById('proStatTotal').textContent = total;
+  document.getElementById('proStatProcessed').textContent = processed;
+  document.getElementById('proStatSkipped').textContent = skipped;
+  document.getElementById('proStatFailed').textContent = failed;
+}
+
+/**
+ * 重置专业模式表单
+ */
 function resetProForm() {
   document.getElementById('proInputDir').value = '';
   document.getElementById('proOutputDir').value = '';
@@ -147,23 +232,15 @@ function resetProForm() {
   document.getElementById('proFilter').value = 'LINEAR';
   document.getElementById('proSrgb').value = 'auto';
   document.getElementById('proAlpha').value = 'auto';
-  document.getElementById('proCpuMode').value = 'single';
+  document.getElementById('proProcessMode').value = 'auto';
+  document.getElementById('proSingleProc').checked = false;
   document.getElementById('proKeepOriginal').checked = true;
   document.getElementById('proRecursive').checked = true;
   document.getElementById('proDryRun').checked = false;
+  
   document.getElementById('proProgressSection').style.display = 'none';
   document.getElementById('proStats').style.display = 'none';
   proStats = { total: 0, processed: 0, skipped: 0, failed: 0 };
+  
   log('专业模式表单已重置', 'info');
-}
-
-function updateProProgress() {
-  const total = proStats.total || 0; const processed = proStats.processed || 0;
-  const percent = total > 0 ? Math.round((processed / total) * 100) : 0;
-  document.getElementById('proProgressBar').style.width = percent + '%';
-  document.getElementById('proProgressText').textContent = `${processed} / ${total} (${percent}%)`;
-  document.getElementById('proStatTotal').textContent = proStats.total;
-  document.getElementById('proStatProcessed').textContent = proStats.processed;
-  document.getElementById('proStatSkipped').textContent = proStats.skipped;
-  document.getElementById('proStatFailed').textContent = proStats.failed;
 }
