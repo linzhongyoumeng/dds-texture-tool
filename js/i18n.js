@@ -1,0 +1,161 @@
+/**
+ * 国际化模块
+ */
+
+const i18n = {
+  zh: {
+    appSubtitle: '通用 DDS 纹理批量处理工具 v' + APP_VERSION,
+    texconvNotSet: '未设置 texconv', texconvReady: 'texconv 已就绪', texconvBundled: '内置 texconv 已就绪',
+    langZh: '中文', langEn: 'English', btnSelectTexconv: '选择 texconv',
+    texconvPath: 'texconv 路径:', btnChange: '更改',
+    tabProcess: '批量处理', tabBackup: '备份回滚', tabInfo: '文件信息', help: '使用帮助',
+    processSettings: '批量处理设置', inputDirLabel: '输入目录 / 文件',
+    inputDirPlaceholder: '选择包含 DDS 文件的目录，或单个 DDS 文件',
+    outputDirLabel: '输出目录', outputDirPlaceholder: '留空则原地覆盖原文件',
+    quickPresets: '快速预设', maxWidth: '最大宽度 (px)', maxHeight: '最大高度 (px)',
+    alignTo: '尺寸对齐到', align1: '1 (不对齐)', align4: '4 (推荐)',
+    fitMode: '缩放模式', fitInside: '等比例内适应', fitWidth: '按宽度缩放', fitHeight: '按高度缩放', fitStretch: '拉伸到目标尺寸',
+    targetFormat: '目标格式', keepFormat: '保持原格式', bcFormats: 'BC 压缩格式', uncompressedFormats: '未压缩格式',
+    srgbMode: 'sRGB 处理', srgbAuto: '自动', srgbOn: '强制开启', srgbOff: '强制关闭',
+    mipmapLevel: 'Mipmap 级数', mipmapPlaceholder: '留空=保持原文件',
+    threadCount: '处理线程数', dxtQuality: 'DXT 压缩质量',
+    qualityFast: '快速', qualityNormal: '标准', qualityProduction: '生产级', qualityHighest: '最高',
+    optRecursive: '递归扫描子目录', optBackup: '处理前自动备份', optSkipUnchanged: '跳过无需变化的文件',
+    optForceFormat: '强制转换格式', optGenMipmaps: '生成完整 Mipmap', optDryRun: '预览模式（不实际修改）',
+    btnStartProcess: '开始处理', btnScanPreview: '扫描预览', btnCancel: '取消', btnDir: '目录', btnFile: '文件', btnOpen: '打开', btnBrowse: '浏览',
+    processProgress: '处理进度', statProcessed: '已处理', statSkipped: '跳过', statFailed: '失败', statDuration: '耗时',
+    fileList: '文件列表', btnSelectAll: '全选', btnDeselectAll: '全不选', btnProcessSelected: '处理选中',
+    backupRollback: '备份回滚', workDir: '工作目录', workDirPlaceholder: '选择包含备份的工作目录',
+    keepBackupCount: '保留备份数量', btnRefreshBackups: '刷新备份列表', btnManualBackup: '手动备份',
+    btnCleanOld: '清理旧备份', btnDeleteAll: '删除所有备份', backupList: '备份点列表',
+    noBackups: '暂无备份点', noBackupsHint: '选择工作目录后点击"刷新备份列表"',
+    backupDetail: '备份详情', btnFolderView: '文件夹视图', btnFlatView: '扁平视图',
+    btnToggleSelect: '全选/反选', btnRollbackSelected: '回滚选中', btnClose: '关闭',
+    searchFileName: '搜索文件名...', btnExpandAll: '全部展开', btnCollapseAll: '全部折叠',
+    fileInfoTitle: 'DDS 文件信息批量查看', selectDirOrFile: '选择目录或文件',
+    infoDirPlaceholder: '选择包含 DDS 的目录，或单个 DDS 文件',
+    btnScanAndView: '扫描并查看', btnExportCSV: '导出 CSV', statsSummary: '统计汇总',
+    colFileName: '文件名 ↕', colDimension: '尺寸 ↕', colFormat: '格式 ↕', colSize: '大小 ↕', colMipmap: 'Mipmap ↕',
+    fileDetailInfo: '文件详细信息', runLog: '运行日志', btnClear: '清空', currentProcessing: '当前处理:',
+    helpTitle: '使用帮助',
+  },
+  en: {
+    appSubtitle: 'Universal DDS Texture Batch Tool v' + APP_VERSION,
+    texconvNotSet: 'texconv not set', texconvReady: 'texconv ready', texconvBundled: 'bundled texconv ready',
+    langZh: '中文', langEn: 'English', btnSelectTexconv: 'Select texconv',
+    texconvPath: 'texconv path:', btnChange: 'Change',
+    tabProcess: 'Batch Process', tabBackup: 'Backup & Rollback', tabInfo: 'File Info', help: 'Help',
+    processSettings: 'Batch Process Settings', inputDirLabel: 'Input Directory / File',
+    inputDirPlaceholder: 'Select a directory containing DDS files, or a single DDS file',
+    outputDirLabel: 'Output Directory', outputDirPlaceholder: 'Leave empty to overwrite in place',
+    quickPresets: 'Quick Presets', maxWidth: 'Max Width (px)', maxHeight: 'Max Height (px)',
+    alignTo: 'Align to', align1: '1 (no align)', align4: '4 (recommended)',
+    fitMode: 'Fit Mode', fitInside: 'Fit Inside', fitWidth: 'Fit Width', fitHeight: 'Fit Height', fitStretch: 'Stretch',
+    targetFormat: 'Target Format', keepFormat: 'Keep Original', bcFormats: 'BC Compressed', uncompressedFormats: 'Uncompressed',
+    srgbMode: 'sRGB Mode', srgbAuto: 'Auto', srgbOn: 'Force On', srgbOff: 'Force Off',
+    mipmapLevel: 'Mipmap Levels', mipmapPlaceholder: 'Empty = keep original',
+    threadCount: 'Threads', dxtQuality: 'DXT Quality',
+    qualityFast: 'Fast', qualityNormal: 'Normal', qualityProduction: 'Production', qualityHighest: 'Highest',
+    optRecursive: 'Recursive subdirectories', optBackup: 'Auto backup before process', optSkipUnchanged: 'Skip unchanged files',
+    optForceFormat: 'Force format conversion', optGenMipmaps: 'Generate full mipmaps', optDryRun: 'Preview mode (no changes)',
+    btnStartProcess: 'Start Process', btnScanPreview: 'Scan Preview', btnCancel: 'Cancel', btnDir: 'Dir', btnFile: 'File', btnOpen: 'Open', btnBrowse: 'Browse',
+    processProgress: 'Process Progress', statProcessed: 'Processed', statSkipped: 'Skipped', statFailed: 'Failed', statDuration: 'Duration',
+    fileList: 'File List', btnSelectAll: 'Select All', btnDeselectAll: 'Deselect All', btnProcessSelected: 'Process Selected',
+    backupRollback: 'Backup & Rollback', workDir: 'Working Directory', workDirPlaceholder: 'Select directory containing backups',
+    keepBackupCount: 'Keep Backup Count', btnRefreshBackups: 'Refresh Backups', btnManualBackup: 'Manual Backup',
+    btnCleanOld: 'Clean Old Backups', btnDeleteAll: 'Delete All Backups', backupList: 'Backup List',
+    noBackups: 'No backups', noBackupsHint: 'Select working directory and click "Refresh Backups"',
+    backupDetail: 'Backup Detail', btnFolderView: 'Folder View', btnFlatView: 'Flat View',
+    btnToggleSelect: 'Toggle All', btnRollbackSelected: 'Rollback Selected', btnClose: 'Close',
+    searchFileName: 'Search filename...', btnExpandAll: 'Expand All', btnCollapseAll: 'Collapse All',
+    fileInfoTitle: 'DDS File Info Batch Viewer', selectDirOrFile: 'Select Directory or File',
+    infoDirPlaceholder: 'Select a directory containing DDS files, or a single DDS file',
+    btnScanAndView: 'Scan & View', btnExportCSV: 'Export CSV', statsSummary: 'Statistics Summary',
+    colFileName: 'Filename ↕', colDimension: 'Dimension ↕', colFormat: 'Format ↕', colSize: 'Size ↕', colMipmap: 'Mipmap ↕',
+    fileDetailInfo: 'File Detail Info', runLog: 'Run Log', btnClear: 'Clear', currentProcessing: 'Processing:',
+    helpTitle: 'Help',
+    logStartProcess: 'Starting batch processing...', logStartPreview: 'Starting preview processing...',
+    logScanComplete: 'Scan complete: {total} total, {process} to process, {skip} skipped',
+    logNoNeedProcess: 'All files are within size limit, no processing needed',
+    logBackupStart: 'Backing up {count} files...', logBackupDone: 'Backup complete: {id} ({count} files)',
+    logProcessDone: 'Complete: {processed} success, {skipped} skipped, {failed} failed, duration {duration}s',
+    logPreviewDone: '[Preview] {processed} success, {skipped} skipped, {failed} failed, duration {duration}s',
+    logRollbackPoint: 'Rollback backup point: {id}', logBackupDeleted: 'Backup {id} deleted',
+    logDeleteFailed: 'Failed to delete backup', logCleanDone: 'Cleaned {count} old backups',
+    logNoBaseDir: 'Please set backup root directory first',
+    helpTitle: 'Help', helpBasicUse: 'Basic Usage',
+    helpStep1: 'Select input directory (Mods folder containing DDS files)',
+    helpStep2: 'Set maximum size (default 3072x3072)',
+    helpStep3: 'Click "Scan Preview" to see which files will be processed',
+    helpStep4: 'Click "Start Processing" when ready',
+    helpCoreRules: 'Core Rules',
+    helpRule1: 'Only process files larger than target size: files equal to limit are NOT processed',
+    helpRule2: 'Auto backup: only files needing processing are backed up, can rollback anytime',
+    helpRule3: 'Preview mode: only simulates processing, does not modify any files',
+    helpBackup: 'Backup & Rollback',
+    helpBackup1: 'View all backup points in "Backup Rollback" tab',
+    helpBackup2: 'Click backup point for details, can rollback all or selected files',
+    helpBackup3: 'Clean old backups keeps the latest N backup points',
+    helpFileInfo: 'File Information',
+    helpInfo1: 'Batch view DDS file size, format, dimensions etc.',
+    helpInfo2: 'Support column sorting and search filtering',
+    helpInfo3: 'Can export to CSV file',
+    helpSection1Title: '1. Quick Start',
+    helpSection1_1: 'Built-in texconv, ready to use, no extra configuration needed',
+    helpSection1_2: 'Select input directory or single DDS file',
+    helpSection1_3: 'Use quick presets to set target size (8K/4K/3K/2K/1K)',
+    helpSection1_4: 'Click "Scan Preview" to view file list, can check only some files to process',
+    helpSection1_5: 'Click "Start Processing" to execute batch conversion',
+    helpSection2Title: '2. Single File Processing',
+    helpSection2Desc: 'The "File" button next to the input box can select a single DDS file, only process this one file to avoid accidental operation on the entire directory.',
+    helpSection3Title: '3. Selective Processing',
+    helpSection3Desc: 'After clicking "Scan Preview", each file in the list has a checkbox. You can select all/deselect all, or only check the files you need to process, then click "Process Selected". The status column will show "Need Process" or "Skip".',
+    helpSection4Title: '4. Quick Presets',
+    helpSection4Desc: 'Provides five common size presets: 8K(8192), 4K(4096), 3K(3072), 2K(2048), 1K(1024). Click to set max width and height.',
+    helpSection5Title: '5. Small File Processing Options',
+    helpSection5Desc: 'By default "Skip files that don\'t need changes" is checked, only files with size exceeding limit or format/mipmap needing change will be processed. Uncheck to re-encode all files, suitable for unified format, repairing corrupted files, etc.',
+    helpSection6Title: '6. Backup & Rollback',
+    helpSection6_1: 'Auto backup before processing by default, only backup files that need processing',
+    helpSection6_2: 'Backup rollback page supports folder view, can view grouped by folder',
+    helpSection6_3: 'Click backup point to expand file details, support single file rollback and comparison',
+    helpSection6_4: 'Can expand/collapse all folders, search filter file names',
+    helpSection6_5: 'Support manual backup, clean old backups, delete all backups',
+    helpSection7Title: '7. Batch File Information View',
+    helpSection7_1: 'After selecting directory, one-click scan all DDS files, display statistics summary (total/total size/max size/size distribution/format distribution)',
+    helpSection7_2: 'Sortable table shows all files, support search filter, click to view details, export CSV',
+    helpSection7_3: 'Input directory will auto-sync from batch processing page',
+    helpSection8Title: '8. Theme & Language',
+    helpSection8_1: 'Sun/moon icon in top right to toggle light/dark theme',
+    helpSection8_2: 'Language dropdown to switch Chinese/English interface',
+    helpSection8_3: 'Settings auto-save, restore on next launch',
+    helpSection9Title: '9. Version Check',
+    helpSection9Desc: 'Refresh icon in top right checks GitHub latest version, prompts download link when update available.',
+    helpSection10Title: '10. Notes',
+    helpSection10_1: 'Keep "Auto Backup" checked before processing, can rollback if error',
+    helpSection10_2: 'Output directory left blank will overwrite original files in place',
+    helpSection10_3: 'Keeping original format avoids compatibility issues like NPC turning white',
+    helpSection10_4: 'Failed entries in log can be clicked to expand detailed error',
+  }
+};
+
+function changeLanguage(lang) {
+  currentLang = lang;
+  applyTranslations();
+  updateTexconvStatus();
+  localStorage.setItem('dds_lang', lang);
+  log(`语言已切换为${lang === 'zh' ? '中文' : 'English'}`, 'info');
+}
+
+function applyTranslations() {
+  const dict = i18n[currentLang] || i18n.zh;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (dict[key]) el.textContent = dict[key]; });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (dict[key]) el.placeholder = dict[key]; });
+  document.querySelectorAll('[data-i18n-label]').forEach(el => { const key = el.getAttribute('data-i18n-label'); if (dict[key]) el.label = dict[key]; });
+  generateHelpContent(dict);
+}
+
+function generateHelpContent(dict) {
+  const body = document.getElementById('helpBody');
+  if (!body) return;
+  body.innerHTML = `<h4>${dict.helpSection1Title || '1. 快速开始'}</h4><ul><li>${dict.helpSection1_1 || '内置 texconv，开箱即用，无需额外配置'}</li><li>${dict.helpSection1_2 || '选择输入目录或单个 DDS 文件'}</li><li>${dict.helpSection1_3 || '用快速预设一键设置目标尺寸（8K/4K/3K/2K/1K）'}</li><li>${dict.helpSection1_4 || '点击"扫描预览"查看文件列表，可勾选只处理部分文件'}</li><li>${dict.helpSection1_5 || '点击"开始处理"执行批量转换'}</li></ul><h4>${dict.helpSection2Title || '2. 单文件处理'}</h4><p>${dict.helpSection2Desc || '输入框旁边的"文件"按钮可选择单个 DDS 文件，只处理这一个文件，避免误操作整个目录。'}</p><h4>${dict.helpSection3Title || '3. 选择性处理'}</h4><p>${dict.helpSection3Desc || '点击"扫描预览"后，文件列表中每个文件都有复选框。可全选/全不选，或只勾选需要处理的文件，然后点击"处理选中"。状态列会显示"需处理"或"跳过"。'}</p><h4>${dict.helpSection4Title || '4. 快速预设'}</h4><p>${dict.helpSection4Desc || '提供 8K(8192)、4K(4096)、3K(3072)、2K(2048)、1K(1024) 五个常用尺寸预设，点击即设置最大宽高。'}</p><h4>${dict.helpSection5Title || '5. 小文件处理选项'}</h4><p>${dict.helpSection5Desc || '默认勾选"跳过无需变化的文件"，只有尺寸超过上限或格式/mipmap需要变化的文件才会被处理。取消勾选后所有文件都会重新编码，适用于统一格式、修复损坏文件等场景。'}</p><h4>${dict.helpSection6Title || '6. 备份与回滚'}</h4><ul><li>${dict.helpSection6_1 || '处理前默认自动备份，只备份需要处理的文件'}</li><li>${dict.helpSection6_2 || '备份回滚页面支持文件夹视图，可按文件夹分组查看'}</li><li>${dict.helpSection6_3 || '点击备份点展开文件详情，支持单文件回滚和对比'}</li><li>${dict.helpSection6_4 || '可全部展开/折叠文件夹，搜索过滤文件名'}</li><li>${dict.helpSection6_5 || '支持手动备份、清理旧备份、删除所有备份'}</li></ul><h4>${dict.helpSection7Title || '7. 文件信息批量查看'}</h4><ul><li>${dict.helpSection7_1 || '选择目录后一键扫描所有 DDS 文件，显示统计汇总（总数/总大小/最大尺寸/尺寸分布/格式分布）'}</li><li>${dict.helpSection7_2 || '可排序表格展示所有文件，支持搜索过滤、点击查看详情、导出 CSV'}</li><li>${dict.helpSection7_3 || '输入目录会自动从批量处理页面同步'}</li></ul><h4>${dict.helpSection8Title || '8. 主题与语言'}</h4><ul><li>${dict.helpSection8_1 || '右上角太阳/月亮图标切换白天/黑夜主题'}</li><li>${dict.helpSection8_2 || '语言下拉菜单切换中文/英文界面'}</li><li>${dict.helpSection8_3 || '设置自动保存，下次启动恢复'}</li></ul><h4>${dict.helpSection9Title || '9. 版本检查'}</h4><p>${dict.helpSection9Desc || '右上角刷新图标检查 GitHub 最新版本，有更新时提示下载链接。'}</p><h4>${dict.helpSection10Title || '10. 注意事项'}</h4><ul><li>${dict.helpSection10_1 || '处理前建议保持"自动备份"勾选，出错可回滚'}</li><li>${dict.helpSection10_2 || '输出目录留空则原地覆盖原文件'}</li><li>${dict.helpSection10_3 || '保持原格式可避免 NPC 变白等兼容性问题'}</li><li>${dict.helpSection10_4 || '日志中失败条目可点击展开查看详细错误'}</li></ul>`;
+}
