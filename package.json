@@ -1,6 +1,6 @@
 {
   "name": "dds-texture-tool",
-  "version": "2.8.1",
+  "version": "2.9.0",
   "description": "通用 DDS 纹理批量处理工具 - Electron 桌面版",
   "main": "main.js",
   "author": "DDS Texture Tool",
@@ -11,7 +11,9 @@
   },
   "devDependencies": {
     "electron": "^31.7.7",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "png-to-ico": "^3.0.2",
+    "rcedit": "^4.0.1"
   },
   "build": {
     "appId": "com.ddstool.texture",
@@ -23,7 +25,9 @@
       "target": [
         {
           "target": "dir",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.ico",
@@ -39,6 +43,16 @@
       "src/**",
       "assets/**",
       "package.json"
+    ],
+    "extraFiles": [
+      {
+        "from": "assets/icon.ico",
+        "to": "assets/icon.ico"
+      },
+      {
+        "from": "assets/icon.png",
+        "to": "assets/icon.png"
+      }
     ],
     "extraResources": [
       {
