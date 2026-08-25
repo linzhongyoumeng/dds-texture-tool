@@ -3,25 +3,40 @@
  * 所有跨模块共享的状态变量
  */
 
+// 配置
 let currentConfig = {};
+
+// 处理状态
 let isProcessing = false;
 let processStartTime = 0;
+
+// 性能优化：进度更新节流
 let pendingProgress = null;
 let progressRafPending = false;
 const MAX_LOG_LINES = 300;
+
+// 扫描预览状态
 let scannedFiles = [];
 let isScanning = false;
+
+// 备份回滚状态
 let currentDetailBackupId = null;
 let currentDetailFiles = [];
 let backupViewMode = 'folder';
 let backupSearchQuery = '';
 let expandedFolders = new Set();
 let folderCheckboxStates = {};
+
+// 文件信息状态
 let infoFiles = [];
 let infoSortKey = 'name';
 let infoSortAsc = true;
 let infoSearchQuery = '';
-const APP_VERSION = '1.9.3';
+
+// 版本信息
+const APP_VERSION = '2.1.0';
 const GITHUB_REPO = 'linzhongyoumeng/dds-texture-tool';
+
+// 语言和主题
 let currentLang = 'zh';
 let currentTheme = 'dark';
