@@ -1,6 +1,6 @@
 {
   "name": "dds-texture-tool",
-  "version": "1.9.3",
+  "version": "2.1.0",
   "description": "通用 DDS 纹理批量处理工具 - Electron 桌面版",
   "main": "main.js",
   "author": "DDS Texture Tool",
