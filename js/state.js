@@ -35,9 +35,13 @@ let infoSortAsc = true;
 let infoSearchQuery = '';
 
 // 版本信息
-const APP_VERSION = '2.5.0';
+const APP_VERSION = '2.8.1';
 const GITHUB_REPO = 'linzhongyoumeng/dds-texture-tool';
 
 // 语言和主题
 let currentLang = 'zh';
 let currentTheme = 'dark';
+
+// 全局CPU/GPU模式（批量模式和命令模式共用）
+// 'auto' = GPU优先（默认），'cpu' = 强制CPU模式
+let globalProcessMode = 'auto';
